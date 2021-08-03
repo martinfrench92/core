@@ -1,7 +1,8 @@
 """Config flow to configure zone component."""
 from __future__ import annotations
 
-from iaqualink import AqualinkClient, AqualinkLoginException
+from iaqualink.client import AqualinkClient
+from iaqualink.exception import AqualinkServiceException
 import voluptuous as vol
 
 from homeassistant import config_entries
@@ -33,7 +34,7 @@ class AqualinkFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 aqualink = AqualinkClient(username, password)
                 await aqualink.login()
                 return self.async_create_entry(title=username, data=user_input)
-            except AqualinkLoginException:
+            except AqualinkServiceException:
                 errors["base"] = "cannot_connect"
 
         return self.async_show_form(

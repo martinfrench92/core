@@ -48,7 +48,10 @@ class HassAqualinkSensor(AqualinkEntity, SensorEntity):
         try:
             state = int(self.dev.state)
         except ValueError:
-            state = float(self.dev.state)
+            try: 
+                state = float(self.dev.state)
+            except ValueError:
+                state = self.dev.state
         return state
 
     @property

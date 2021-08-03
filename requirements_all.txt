@@ -804,7 +804,7 @@ hyperion-py==0.7.4
 iammeter==0.1.7
 
 # homeassistant.components.iaqualink
-iaqualink==0.3.4
+iaqualink==0.5.0
 
 # homeassistant.components.watson_tts
 ibm-watson==4.0.1

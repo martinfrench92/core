@@ -6,15 +6,20 @@ from functools import wraps
 import logging
 
 import aiohttp.client_exceptions
-from iaqualink import (
-    AqualinkBinarySensor,
+from iaqualink.client import (
     AqualinkClient,
+)
+from iaqualink.device import (
+    AqualinkBinarySensor,
     AqualinkDevice,
     AqualinkLight,
-    AqualinkLoginException,
     AqualinkSensor,
     AqualinkThermostat,
     AqualinkToggle,
+)
+from iaqualink.exception import (
+    AqualinkServiceException,
+    AqualinkServiceUnauthorizedException,
 )
 import voluptuous as vol
 
@@ -98,7 +103,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
     aqualink = AqualinkClient(username, password, session)
     try:
         await aqualink.login()
-    except AqualinkLoginException as login_exception:
+    except AqualinkServiceException as login_exception:
         _LOGGER.error("Failed to login: %s", login_exception)
         return False
     except (
@@ -148,10 +153,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
 
     async def _async_systems_update(now):
         """Refresh internal state for all systems."""
-        prev = systems[0].last_run_success
+        prev = systems[0].online
 
         await systems[0].update()
-        success = systems[0].last_run_success
+        success = systems[0].online
 
         if not success and prev:
             _LOGGER.warning("Failed to refresh iAqualink state")
@@ -225,7 +230,7 @@ class AqualinkEntity(Entity):
     @property
     def assumed_state(self) -> bool:
         """Return whether the state is based on actual reading from the device."""
-        return not self.dev.system.last_run_success
+        return not self.dev.system.online
 
     @property
     def available(self) -> bool:
@@ -236,8 +241,8 @@ class AqualinkEntity(Entity):
     def device_info(self) -> DeviceInfo:
         """Return the device info."""
         return {
-            "identifiers": {(DOMAIN, self.unique_id)},
-            "name": self.name,
+            "identifiers": {(DOMAIN, self.dev.system.serial)},
+            "name": self.dev.system.name,
             "model": self.dev.__class__.__name__.replace("Aqualink", ""),
             "manufacturer": "Jandy",
             "via_device": (DOMAIN, self.dev.system.serial),
