@@ -3,13 +3,13 @@ from __future__ import annotations
 
 import logging
 
-from iaqualink.device import AqualinkHeater, AqualinkPump, AqualinkSensor, AqualinkState
 from iaqualink.const import (
     AQUALINK_TEMP_CELSIUS_HIGH,
     AQUALINK_TEMP_CELSIUS_LOW,
     AQUALINK_TEMP_FAHRENHEIT_HIGH,
     AQUALINK_TEMP_FAHRENHEIT_LOW,
 )
+from iaqualink.device import AqualinkHeater, AqualinkPump, AqualinkSensor, AqualinkState
 
 from homeassistant.components.climate import ClimateEntity
 from homeassistant.components.climate.const import (
@@ -102,7 +102,7 @@ class HassAqualinkThermostat(AqualinkEntity, ClimateEntity):
     @property
     def target_temperature(self) -> float:
         """Return the current target temperature."""
-        if self.name.lower() == "heating":
+        if self.name.lower() == "heating"or self.name.lower() == "state":
             return float(self.dev.setpoint)
         else:
             return float(self.dev.state)
@@ -117,6 +117,8 @@ class HassAqualinkThermostat(AqualinkEntity, ClimateEntity):
         """Return the sensor device for the current thermostat."""
         if self.name.lower() == "heating":
             sensor = "sns_3"
+        elif self.name.lower() == "state":
+            sensor = "sns_1"
         else:
             sensor = f"{self.name.lower()}_temp"
         return self.dev.system.devices[sensor]
@@ -131,7 +133,7 @@ class HassAqualinkThermostat(AqualinkEntity, ClimateEntity):
     @property
     def heater(self) -> AqualinkHeater:
         """Return the heater device for the current thermostat."""
-        if self.name.lower() == "heating":
+        if self.name.lower() == "heating" or self.name.lower() == "state":
             heater = self.dev.name
         else:
             heater = f"{self.name.lower()}_heater"

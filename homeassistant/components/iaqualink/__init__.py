@@ -6,9 +6,7 @@ from functools import wraps
 import logging
 
 import aiohttp.client_exceptions
-from iaqualink.client import (
-    AqualinkClient,
-)
+from iaqualink.client import AqualinkClient
 from iaqualink.device import (
     AqualinkBinarySensor,
     AqualinkDevice,
